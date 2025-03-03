@@ -1,7 +1,7 @@
 import { SummaryRequest, SummaryResponse, BackendResponse } from '../types/types';
 import { CacheService } from './cache';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://indiatoday-ivory.vercel.app';
+const API_URL = import.meta.env.VITE_API_URL || 'https://image-render-ru6u.onrender.com';
 
 export const generateSummary = async (request: SummaryRequest): Promise<SummaryResponse> => {
   try {
