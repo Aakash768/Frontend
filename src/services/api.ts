@@ -1,23 +1,22 @@
 import { SummaryRequest, SummaryResponse, BackendResponse } from '../types/types';
 import { CacheService } from './cache';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://indiatoday-ivory.vercel.app/';
+const API_URL = import.meta.env.VITE_API_URL || 'https://indiatoday-ivory.vercel.app';
 
 export const generateSummary = async (request: SummaryRequest): Promise<SummaryResponse> => {
   try {
     console.log('Sending request to API:', request);
 
-    // Create a cache key based on the request
     const cacheKey = JSON.stringify(request);
-    
-    // Check cache first
     const cachedResponse = CacheService.get<SummaryResponse>(cacheKey);
     if (cachedResponse) {
-      console.log('Returning cached response');
       return cachedResponse;
     }
 
-    const response = await fetch(`${API_URL}api/gemini/process`, {
+    // Make sure there's a trailing slash in the URL
+    const apiEndpoint = `${API_URL}/api/gemini/process`;
+    
+    const response = await fetch(apiEndpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -31,7 +30,6 @@ export const generateSummary = async (request: SummaryRequest): Promise<SummaryR
     }
 
     const data: BackendResponse = await response.json();
-    console.log('Received response:', data);
 
     if (!data.summary || !data.summary.text) {
       throw new Error('Invalid response format from server');
@@ -46,10 +44,7 @@ export const generateSummary = async (request: SummaryRequest): Promise<SummaryR
       }
     };
 
-    // Cache the response
     CacheService.set(cacheKey, result);
-
-    console.log('Transformed response:', result);
     return result;
 
   } catch (error) {

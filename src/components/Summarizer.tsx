@@ -38,16 +38,21 @@ const Summarizer: React.FC = () => {
       return;
     }
 
-    const request: SummaryRequest = {
-      text,
-      ...(keywords && { keywords }),
-      ...(model && { model }),
-      ...(customPrompt && { customPrompt }),
-    };
+    try {
+      const request: SummaryRequest = {
+        text,
+        ...(keywords && { keywords }),
+        ...(model && { model }),
+        ...(customPrompt && { customPrompt }),
+      };
 
-    const result = await callApi(request);
-    if (result) {
-      setResponse(result);
+      const result = await callApi(request);
+      if (result) {
+        setResponse(result);
+      }
+    } catch (error) {
+      console.error('Error generating summary:', error);
+      // Handle the error appropriately in your UI
     }
   };
 

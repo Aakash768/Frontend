@@ -22,17 +22,14 @@ export default defineConfig({
       },
       mangle: {
         toplevel: true
-      },
-      format: {
-        comments: false
       }
     },
     rollupOptions: {
       output: {
         format: 'es',
-        entryFileNames: 'assets/[name].[hash].mjs',
-        chunkFileNames: 'assets/[name].[hash].mjs',
-        assetFileNames: 'assets/[name].[hash].[ext]'
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
       }
     }
   },
