@@ -1,57 +1,53 @@
-import React, { useState } from 'react';
-import { ModelType, SummaryRequest, SummaryResponse } from '../types/types';
-import TextInput from './TextInput';
+import React, { useState, useEffect } from 'react';
+import { ModelType, SummaryRequest, SummaryResponse } from '@/types';
+import TextInput from '@components/TextInput';
 import KeywordsInput from './KeywordsInput';
 import ModelSelector from './ModelSelector';
 import CustomPrompt from './CustomPrompt';
 import SummaryOutput from './SummaryOutput';
-import { generateSummary } from '../services/api';
 import LoadingSpinner from './LoadingSpinner';
+import { useApi } from '@/hooks/useApi';
 
 const Summarizer: React.FC = () => {
   const [text, setText] = useState<string>('');
   const [keywords, setKeywords] = useState<string>('');
   const [model, setModel] = useState<ModelType>('1.5-flash');
   const [customPrompt, setCustomPrompt] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
   const [response, setResponse] = useState<SummaryResponse | null>(null);
-  const [error, setError] = useState<string>('');
+  const { loading, error, callApi } = useApi();
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  useEffect(() => {
+    // Simulate checking if everything is loaded
+    const timer = setTimeout(() => {
+      setIsInitializing(false);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isInitializing) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   const handleGenerate = async () => {
     if (!text.trim()) {
-      setError('Please enter some text to summarize');
       return;
     }
 
-    setLoading(true);
-    setError('');
-    setResponse(null);
+    const request: SummaryRequest = {
+      text,
+      ...(keywords && { keywords }),
+      ...(model && { model }),
+      ...(customPrompt && { customPrompt }),
+    };
 
-    try {
-      const request: SummaryRequest = {
-        text,
-        ...(keywords && { keywords }),
-        ...(model && { model }),
-        ...(customPrompt && { customPrompt }),
-      };
-
-      console.log('Sending request with:', { text: text.substring(0, 100) + '...', keywords, model, customPrompt });
-      
-      const result = await generateSummary(request);
-      console.log('Received result:', result);
-      
-      if (!result.summary) {
-        throw new Error('No summary generated');
-      }
+    const result = await callApi(request);
+    if (result) {
       setResponse(result);
-    } catch (err) {
-      console.error('Error in handleGenerate:', err);
-      setError(err instanceof Error ? 
-        `Error: ${err.message}` : 
-        'Error processing text. Please try again.'
-      );
-    } finally {
-      setLoading(false);
     }
   };
 

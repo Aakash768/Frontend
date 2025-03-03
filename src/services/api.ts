@@ -1,14 +1,27 @@
 import { SummaryRequest, SummaryResponse, BackendResponse } from '../types/types';
+import { CacheService } from './cache';
+
+const API_URL = import.meta.env.VITE_API_URL || 'https://indiatoday-ivory.vercel.app/';
 
 export const generateSummary = async (request: SummaryRequest): Promise<SummaryResponse> => {
   try {
     console.log('Sending request to API:', request);
 
-    const response = await fetch('http://localhost:5000/api/gemini/process', {
+    // Create a cache key based on the request
+    const cacheKey = JSON.stringify(request);
+    
+    // Check cache first
+    const cachedResponse = CacheService.get<SummaryResponse>(cacheKey);
+    if (cachedResponse) {
+      console.log('Returning cached response');
+      return cachedResponse;
+    }
+
+    const response = await fetch(`${API_URL}api/gemini/process`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        'Accept': 'application/json'
       },
       body: JSON.stringify(request),
     });
@@ -32,6 +45,9 @@ export const generateSummary = async (request: SummaryRequest): Promise<SummaryR
         apiTokens: data.summary.promptTokens + data.summary.responseTokens
       }
     };
+
+    // Cache the response
+    CacheService.set(cacheKey, result);
 
     console.log('Transformed response:', result);
     return result;
