@@ -20,26 +20,17 @@ export default defineConfig({
         pure_funcs: ['console.log']
       },
       mangle: {
-        toplevel: true,
-        safari10: true
+        toplevel: true
       },
       format: {
         comments: false
       }
     },
-    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
-          components: [
-            './src/components/Summarizer.tsx',
-            './src/components/SummaryOutput.tsx'
-          ]
-        },
-        entryFileNames: 'assets/[name].[hash].js',
-        chunkFileNames: 'assets/[name].[hash].js',
-        assetFileNames: 'assets/[name].[hash].[ext]'
+          vendor: ['react', 'react-dom']
+        }
       }
     }
   },
